@@ -1,1 +1,18 @@
-
+import ts from 'typescript';import fs from 'node:fs';import assert from 'node:assert/strict';
+const dir=new URL('../.sites-runtime/',import.meta.url);fs.mkdirSync(dir,{recursive:true});
+const compile=s=>ts.transpileModule(s,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+fs.writeFileSync(new URL('records-test.mjs',dir),compile(fs.readFileSync(new URL('../lib/records.ts',import.meta.url),'utf8')));
+let source=fs.readFileSync(new URL('../app/api/records/route.ts',import.meta.url),'utf8').replace("import { env } from 'cloudflare:workers';","const env=globalThis.testEnv;").replace("import { getChatGPTUser } from '../../chatgpt-auth';","const getChatGPTUser=async()=>globalThis.testUser;").replace("'../../../lib/records'","'./records-test.mjs'");
+fs.writeFileSync(new URL('api-test.mjs',dir),compile(source));
+globalThis.testEnv={};globalThis.testUser=null;
+const api=await import(new URL('api-test.mjs',dir));
+assert.equal((await api.GET(new Request('https://example.test/api/records'))).status,401);
+assert.equal((await api.POST(new Request('https://example.test/api/records',{method:'POST'}))).status,401);
+globalThis.testUser={userId:'test',email:'test@example.test'};
+assert.equal((await api.POST(new Request('https://example.test/api/records',{method:'POST',headers:{origin:'https://evil.test'}}))).status,403);
+assert.equal((await api.POST(new Request('https://example.test/api/records',{method:'POST',headers:{origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({data:{}})}))).status,400);
+const {recordSchema}=await import(new URL('records-test.mjs',dir));
+const valid={fullName:'Test Customer',mykad:'000000000000',phone:'+60100000000',account:'Test account',appId:'TEST-1',status:'Pending',amount:100.50,dueDate:'2026-12-31',notes:''};
+assert(recordSchema.safeParse(valid).success);
+for(const change of [{amount:0},{amount:-10},{amount:1.001},{dueDate:'2026-02-30'},{mykad:'123'},{status:'Anything'}])assert(!recordSchema.safeParse({...valid,...change}).success);
+console.log('PASS: anonymous API access denied, cross-origin writes denied, input validation');
