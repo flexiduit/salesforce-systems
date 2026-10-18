@@ -1,39 +1,25 @@
-# FlexiDuit Cloudflare Access JWT patch
+# FlexiDuit — top navigation, sidebar and About Company
 
-## What changes
+Contains a non-destructive patch for an existing `flexiduit/salesforce-systems` React/Vinext application.
 
-Replace `app/chatgpt-auth.ts` in `flexiduit/salesforce-systems` with the file included here. The original import/export names remain compatible with `app/page.tsx` and `app/api/records/route.ts`. Authentication switches from untrusted ChatGPT header claims to cryptographically verified Cloudflare Access JWTs.
+## Changes
+- Keeps the existing fixed sidebar; adds an **About Company** navigation item.
+- Keeps the top navigation, existing working notification bell and sign-out icon; adds quick links to Dashboard / Customers / About Company.
+- Changes visual theme from dark green to purple and lavender, without changing records API or D1.
+- Adds About Company editable cards (company name, description, website, mission, services).
+- Changes old ChatGPT sign-out links to `/cdn-cgi/access/logout` (Cloudflare Access logout endpoint).
+- The company editor saves text in browser localStorage only, not server-wide. Do not treat it as a production-wide CMS.
 
-In `app/dashboard.tsx`, replace **every** occurrence of:
+## Install (developer / Codespaces)
+Unzip the patch, then run:
 
-`/signout-with-chatgpt?return_to=%2F`
+```
+python install.py /path/to/salesforce-systems
+cd /path/to/salesforce-systems
+npm run build
+```
 
-with:
+Review `git diff` and backup `.bak` files. Commit only when the build and UI tests pass. Cloudflare may auto-deploy on new commits.
 
-`/cdn-cgi/access/logout`
-
-Do not change the dashboard JSX layout, CSS or records SQL.
-
-## Configure Cloudflare Worker variables
-
-Set these in the Worker configuration as non-secret plain text variables (these contain identifiers, not signing credentials):
-
-- `CF_ACCESS_TEAM_DOMAIN`: `<your-team>.cloudflareaccess.com`
-- `CF_ACCESS_AUD`: the **AUD application tag** from Access > Applications > FlexiDuit app
-- `ADMIN_EMAILS`: one or more explicitly authorized email addresses separated by commas, e.g. `admin@example.com`
-
-Do not use the example values in production. Protect the **entire** Worker domain, all routes, and all environments that can reach customer data. Configure the Access policy to allow only approved admins, preferably with MFA. Verify this is a policy for the exact workers.dev/custom domain used.
-
-The Cloudflare Access proxy attaches `Cf-Access-Jwt-Assertion` to requests. The backend verifies the RS256 signature with Access JWKS endpoint, issuer, audience, expiration, subject and allowed email. No request is granted access when configuration is missing or JWKS is inaccessible.
-
-## Deploy & validate
-
-1. Commit the file replacement and dashboard link replacement to GitHub.
-2. Configure the three Worker variables and deploy the new commit.
-3. Test the Worker domain in a private browser window. Unauthorized users should not pass Access.
-4. Sign in with the approved admin and load the dashboard. It should call `/api/records` successfully and show an empty records table (if D1 is empty).
-5. Test a non-admin identity, missing/invalid JWT, record creation, reload and updates. `/api/records` must return 401 with no verified token.
-6. Check your D1 binding is `DB` and points to database `5739d3aa-217f-4e2c-8f08-de5bdf10957d`.
-7. Do not add real MyKad or banking data before validating authorization, secure backups, retention policies, and operational access controls.
-
-Notes: Logging out of the app requires `/cdn-cgi/access/logout` under the Cloudflare Access-protected hostname. Existing ChatGPT routes should no longer be used. This patch has not been built or end-to-end tested against the production account. Existing records keyed to a former ChatGPT user ID may not appear under the new Cloudflare Access subject; migration would be required if legacy records exist.
+## Caution
+Do not overwrite production `app/chatgpt-auth.ts`, database migration files or Wrangler settings with older ZIP snapshots. The existing JWT authentication must remain in place. Cloudflare Access must protect all production traffic and the backend must verify its JWT.
