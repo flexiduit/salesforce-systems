@@ -1,0 +1,14 @@
+/* FlexiDuit two-navigation layout and company cards. Purple / lavender brand adaptation. */
+:root{--navy:#24133d;--ink:#34244c;--muted:#8a7f9d;--green:#7847d8;--bg:#faf7ff;--line:#eee7f5}
+.sidebar{background:linear-gradient(160deg,#24133d,#3a2060);color:#f6edff}
+.sidebar nav button{color:#dac9f1}.sidebar nav button.current{background:#e9dcff;color:#3e2074}
+.workspace-icon{background:#8157c1}.workspace{border-color:#ffffff2d}.workspace b{color:#fff}.workspace small{color:#d4c2ea}
+.secure-box{background:linear-gradient(135deg,#4a2774,#301b51);border-color:#ffffff20}.secure-box b{color:white}
+.primary{background:#7847d8}.primary:hover{background:#6836cc}
+.primary:focus-visible,.secondary:focus-visible{outline-color:#a98be8}
+.topbar{background:#fff;position:sticky;top:0;z-index:30}
+.topbar-quicknav{display:flex;gap:6px;align-items:center;margin-inline:auto}
+.topbar-quicknav button{padding:9px 12px;border-radius:9px;font-weight:600;font-size:11px;color:#776b89;white-space:nowrap}
+.topbar-quicknav button.selected,.topbar-quicknav button:hover{background:#f0e7ff;color:#5a2ea5}
+.company-area{margin:18px 0 24px}.company-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(110deg,#f1e8ff,#fff);border:1px solid #e9daf9;border-radius:15px;padding:25px;margin-bottom:16px}.company-hero-icon{display:grid;place-items:center;background:#7847d8;color:white;width:60px;height:60px;flex-shrink:0;border-radius:15px}.company-hero>div{flex:1}.company-hero h2{font-size:24px;margin:7px 0}.company-hero p{color:#6f6480;line-height:1.6}.company-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.company-info-card{display:flex;flex-direction:column;gap:12px;min-width:0;background:white;border:1px solid #eae2f4;border-radius:13px;padding:23px;min-height:168px}.company-info-card svg{color:#7847d8}.company-info-card small{color:#8c819b;font-weight:700}.company-info-card p,.company-info-card a{overflow-wrap:anywhere;color:#554667;line-height:1.6}.company-info-card a{color:#6836cc}.company-edit{display:grid;gap:14px;margin-top:17px;padding:22px;background:white;border:1px solid #e9def4;border-radius:14px}.company-edit label{display:grid;gap:7px;font-weight:600;font-size:12px}.company-edit input,.company-edit textarea{border:1px solid #dacbe8;padding:12px;border-radius:8px;background:#fff;width:100%;color:#34244c}.company-edit-actions{display:flex;gap:10px}.company-edit>p{color:#80748c;font-size:11px}
+@media(max-width:1200px){.topbar-quicknav{display:none}}@media(max-width:760px){.company-grid{grid-template-columns:1fr}.company-hero{flex-wrap:wrap}.company-hero>div{flex-basis:calc(100% - 85px)}}
